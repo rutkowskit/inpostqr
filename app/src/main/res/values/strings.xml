@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Inpost QR Generator</string>
+    <string name="action_settings">Ustawienia</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+
+    <!-- Example settings for Data & Sync -->
+
+    <!-- Example settings for Notifications -->
+
+    <string name="cancelLabel">Anuluj</string>
+    <string name="okLabel">OK</string>
+    <string name="qrCodeLabel">Kod QR</string>
+    <string name="appTitle">Generator Kodów QR Inpost</string>
+    <string name="action_refresh">Odśwież</string>
+    <string name="action_close">Zamknij</string>
+    <string name="msgRefreshed">Odświeżono</string>
+    <string name="prefName">MyPref</string>
+    <string name="action_save">Zapisz</string>
+    <string name="msgSaved">Zapisano</string>
+    <string name="msgSaveError">Błąd podczas zapisu !</string>
+    <string name="action_generateManual">Wprowadź manualnie</string>
+    <string name="msgPhoneNumberTooShort">Zbyt krótki numer telefonu</string>
+    <string name="msgReceptionCodeTooShort">Kod odbioru zbyt krótki</string>
+    <string name="msgAccessDeniedSmsRead">Brak uprawnień do czytania SMS</string>
+</resources>

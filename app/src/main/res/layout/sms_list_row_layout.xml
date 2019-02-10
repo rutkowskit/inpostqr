@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/labelSmsId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@+id/labelSmsId"
+        android:width="80sp"
+        android:textAlignment="center"
+        android:textStyle="italic"
+        android:textSize="20sp" />
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@+id/label"
+        android:layout_toEndOf="@+id/labelSmsId"
+        android:textSize="20sp" />
+    <TextView
+        android:id="@+id/labelSmsDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@+id/labelSmsDate"
+        android:textSize="12sp"
+        android:layout_below="@id/labelSmsId"
+        />
+    <TextView
+        android:id="@+id/labelSmsBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@+id/labelSmsBody"
+        android:textSize="12sp"
+        android:height="30sp"
+        android:layout_below="@id/labelSmsDate"
+        />
+
+</RelativeLayout>
