@@ -1,14 +1,13 @@
 package vrt.inpost.qr;
 
 import android.Manifest;
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -17,56 +16,49 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_SMS=6789;
-
     private SharedPreferences _pref;
-    private List<SmsData> _smsData;
-    private final Context context = this;
+    private int _maxDaysBeforeNow;
+    private final Activity _context = this;
+    private final Locale _locale= new Locale("POLISH","PL","pl");
 
+    private ViewGroup _rootView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         _pref = getApplicationContext().getSharedPreferences(getString(R.string.prefName), 0); // 0 - for private mode
+        _maxDaysBeforeNow= _pref.getInt("MAX_DAYS", 10);
+        _rootView = findViewById(android.R.id.content);
+
         setTitle(R.string.appTitle);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.READ_SMS)) {
-            } else {
-                // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_SMS},
                         MY_PERMISSIONS_REQUEST_READ_SMS);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
         }
         else {
-            updateListView(getSmsList());
+            updateListView(SmsUtils.getSmsList(_context,false,_maxDaysBeforeNow));
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -77,14 +69,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
-            updateListView(getSmsList());
+            updateListView(SmsUtils.getSmsList(_context,true,_maxDaysBeforeNow));
             Notify.Info(this, getString(R.string.msgRefreshed));
             return true;
         }
@@ -106,24 +93,22 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_READ_SMS: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    updateListView(getSmsList());
+                    updateListView(SmsUtils.getSmsList(_context,false,_maxDaysBeforeNow));
                 } else {
                     Notify.Error(this,getString(R.string.msgAccessDeniedSmsRead));
                 }
-                return;
             }
         }
     }
 
     private void updateListView(List<SmsData> data) {
-        final ListView listview = findViewById(R.id.smsListiew);
+        final ListView listview = findViewById(R.id.smsListView);
 
         final SmsListAdapter adapter = new SmsListAdapter(this,data);
         listview.setAdapter(adapter);
@@ -155,53 +140,42 @@ public class MainActivity extends AppCompatActivity {
         String qrCodeText = InpostHelper.getQrText(phoneNumber, receptionCode);
 
         Intent i = new Intent(getApplicationContext(), QrDisplayActivity.class);
-        i.putExtra("SMS", qrCodeText);
+        i.putExtra(getString(R.string.prefSMS), qrCodeText);
         startActivity(i);
     }
 
 
-    private String onGenerateManual() {
+    private void onGenerateManual() {
 
-        // get prompts.xml view
-        LayoutInflater li = LayoutInflater.from(context);
-        View promptsView = li.inflate(R.layout.prompt_for_reception_data, null);
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-
-        alertDialogBuilder.setView(promptsView);
+        LayoutInflater li = LayoutInflater.from(_context);
+        View promptsView = li.inflate(R.layout.prompt_for_reception_data, _rootView,false);
 
         final AutoCompleteTextView phoneField = promptsView.findViewById(R.id.uxPhoneNumberField);
         final EditText codeField = promptsView.findViewById(R.id.uxReceptionCodeField);
 
         List<String> phones = getPhoneNumberFromPrefs();
         ArrayAdapter<String> adapter =
-                new ArrayAdapter(this, android.R.layout.simple_list_item_1,phones);
+                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,phones);
         phoneField.setAdapter(adapter);
+        phoneField.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton(R.string.okLabel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                String phone = phoneField.getText().toString();
-                                String code = codeField.getText().toString();
-                                showQrCode(phone, code);
-                            }
-                        })
-                .setNegativeButton(R.string.cancelLabel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
-        return null; //alert is async, so return null
+        createAlertDialog(promptsView, new OnAlertDialogClickListener() {
+            @Override
+            public boolean onOK(DialogInterface dialog) {
+                String phone = phoneField.getText().toString();
+                String code = codeField.getText().toString();
+                if(phone.length()!=9) {
+                    Notify.Error(_context, getString(R.string.msgPhoneNumberTooShort));
+                    return false;
+                }
+                if(code.length()!=6) {
+                    Notify.Error(_context, getString(R.string.msgReceptionCodeTooShort));
+                    return false;
+                }
+                showQrCode(phone, code);
+                return true;
+            }
+        }).show();
     }
 
     private List<String> getPhoneNumberFromPrefs() {
@@ -220,76 +194,61 @@ public class MainActivity extends AppCompatActivity {
 
         if(null==sms) return null;
 
-        final String key = String.format("SIM_%d_%s",sms.SimSlot+1, sms.SimImsi);
+        final String key = String.format(_locale, getString(R.string.formatSimKey),sms.SimSlot+1, sms.SimImsi);
 
         String result = _pref.getString(key, null);
         if(null!=result) return result;
 
-        // get prompts.xml view
-        LayoutInflater li = LayoutInflater.from(context);
-        View promptsView = li.inflate(R.layout.prompt_for_phone, null);
+        LayoutInflater li = LayoutInflater.from(_context);
 
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-
+        View promptsView = li.inflate(R.layout.prompt_for_phone, _rootView,false);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(_context);
         alertDialogBuilder.setView(promptsView);
 
-        final TextView label = promptsView.findViewById(R.id.uxPhoneNumberLabel);
-        final EditText field = promptsView.findViewById(R.id.uxPhoneNumberField);
+        final EditText phoneField = promptsView.findViewById(R.id.uxPhoneNumberField);
+        phoneField.setHint(String.format(_locale,
+                getString(R.string.formatEnterPhoneForSimInSlot), sms.SimSlot+1));
 
-        label.setText(String.format("Wpisz nr telefonu dla sim w slocie %d", sms.SimSlot+1));
+        createAlertDialog(promptsView, new OnAlertDialogClickListener() {
+            @Override
+            public boolean onOK(DialogInterface dialog) {
+                String phone = phoneField.getText().toString();
+                if(phone.length()!=9) {
+                    Notify.Error(_context, getString(R.string.msgPhoneNumberTooShort));
+                    return false;
+                }
+                SharedPreferences.Editor editor = _pref.edit();
+                editor.putString(key,phone );
+                editor.apply();
+                showQrCode(phone,sms.ReceptionCode);
+                return true;
+            }
+        }).show();
 
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton(R.string.okLabel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                String value = field.getText().toString();
-                                SharedPreferences.Editor editor = _pref.edit();
-                                editor.putString(key,value );
-                                editor.commit();
-                                showQrCode(value, sms.ReceptionCode);
-                            }
-                        })
-                .setNegativeButton(R.string.cancelLabel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
-        return null; //alert is async, so return null
+        return null;
     }
 
-    private List<SmsData> getSmsList() {
-        if(null!=_smsData) return _smsData;
-        Uri uri = Uri.parse("content://sms/inbox");
-        Cursor cursor = getContentResolver()
-                .query(uri, null, null, null, null);
+    private AlertDialog createAlertDialog(View promptsView, final OnAlertDialogClickListener okListener) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(_context)
+                .setView(promptsView)
+                .setPositiveButton(R.string.okLabel, null)
+                .setNegativeButton(R.string.cancelLabel, null)
+                .create();
 
-        List<SmsData> smsList = new ArrayList<>();
-        SmsDataResolver resolver = new SmsDataResolver(cursor);
-        SmsData sms;
-        Date minDate = addDays(Calendar.getInstance().getTime(),-10);
-        while ((sms=resolver.getNext())!=null) {
-            if(sms.DateSent.before(minDate)) break; //zbyt starych nie pobieraj
-            if(null==sms.ReceptionCode) continue;
-            smsList.add(sms);
-        }
-        resolver.finish();
-        _smsData = smsList;
-        return smsList;
-    }
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(final DialogInterface dialog) {
 
-    public static Date addDays(Date date, int days) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.DATE, days);
-        return cal.getTime();
+                Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(okListener.onOK(dialog))
+                            dialog.dismiss();
+                    }
+                });
+            }
+        });
+        return alertDialog;
     }
 }

@@ -1,6 +1,7 @@
 package vrt.inpost.qr;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,15 +10,15 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Objects;
 
-public class SmsListAdapter extends ArrayAdapter<SmsData> {
+class SmsListAdapter extends ArrayAdapter<SmsData> {
 
     static class ViewHolder {
         TextView smsIdField;
         TextView recCodeField;
         TextView smsBodyField;
         TextView smsSentDateField;
-        int position;
     }
     // List context
     private final Context context;
@@ -31,18 +32,18 @@ public class SmsListAdapter extends ArrayAdapter<SmsData> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    @NonNull
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
         ViewHolder holder;
         if(convertView==null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.sms_list_row_layout, parent, false);
+            convertView = Objects.requireNonNull(inflater).inflate(R.layout.sms_list_row_layout, parent, false);
             holder = new ViewHolder();
             holder.smsIdField = convertView.findViewById(R.id.labelSmsId);
             holder.recCodeField = convertView.findViewById(R.id.label);
             holder.smsSentDateField = convertView.findViewById(R.id.labelSmsDate);
             holder.smsBodyField = convertView.findViewById(R.id.labelSmsBody);
-            holder.position=position;
             convertView.setTag(holder);
         }
         else {

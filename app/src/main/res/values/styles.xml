@@ -13,4 +13,9 @@
         <item name="windowNoTitle">false</item>
     </style>
 
+    <style name="progressBar" parent="@style/Theme.AppCompat">
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
+
+
 </resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.design.widget.TextInputLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:counterEnabled="true"
+    app:counterMaxLength="9"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <vrt.inpost.qr.MyAutoCompleteTextView
+        android:id="@+id/uxPhoneNumberField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/labelEnterPhoneNumber"
+        android:inputType="phone"
+        android:digits="0123456789"
+        />
+
+</android.support.design.widget.TextInputLayout>
+

@@ -5,19 +5,19 @@ import android.database.Cursor;
 import java.util.Calendar;
 import java.util.Date;
 
-public class SmsDataResolver {
+class SmsDataResolver {
 
-    private int _idIdx;
-    private int _senderIdx;
-    private int _dateSentIdx ;
-    private int _simSlotIdx;
-    private int _simImsiIdx;
-    private int _subjectIdx;
-    private int _bodyIdx;
-    private Cursor _cursor;
+    final private int _idIdx;
+    final private int _senderIdx;
+    final private int _dateSentIdx ;
+    final private int _simSlotIdx;
+    final private int _simImsiIdx;
+    final private int _subjectIdx;
+    final private int _bodyIdx;
+    final private Cursor _cursor;
     private  boolean _hasNext;
 
-    public SmsDataResolver(Cursor cursor) {
+    SmsDataResolver(Cursor cursor) {
         _idIdx = cursor.getColumnIndex("_id");
         _senderIdx = cursor.getColumnIndex("address");
         _dateSentIdx = cursor.getColumnIndex("date_sent");
@@ -29,7 +29,7 @@ public class SmsDataResolver {
         _hasNext= _cursor.moveToFirst();
     }
 
-    public SmsData getNext() {
+    SmsData getNext() {
         if(!_hasNext) return null;
         SmsData result = new SmsData();
         result.Id = _cursor.getString(_idIdx);
@@ -45,7 +45,7 @@ public class SmsDataResolver {
         return result;
     }
 
-    public void finish() {
+    void finish() {
         if(null==_cursor) return;
         _cursor.close();
     }

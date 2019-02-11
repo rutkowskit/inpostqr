@@ -35,8 +35,14 @@ public class MyAutoCompleteTextView extends android.support.v7.widget.AppCompatA
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        this.showDropDown();
+        performClick();
         return super.onTouchEvent(event);
     }
-    
+
+    @Override
+    public boolean performClick() {
+        super.performClick();
+        this.showDropDown();
+        return true;
+    }
 }

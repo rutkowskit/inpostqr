@@ -4,23 +4,26 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 
-public class GenerateQrAsync extends AsyncTask<String, Void, Bitmap> {
+import java.lang.ref.WeakReference;
 
-    private QrDisplayActivity _context;
+class GenerateQrAsync extends AsyncTask<String, Void, Bitmap> {
+
+    final private WeakReference<QrDisplayActivity> _context;
     private int _size;
 
-
-    public GenerateQrAsync(QrDisplayActivity activity) {
+    GenerateQrAsync(WeakReference<QrDisplayActivity> activity) {
         _context = activity;
     }
 
     protected void onPreExecute() {
-        _context.showLoadIndicator(true);
+        QrDisplayActivity activity = _context.get();
+        if(null==activity || activity.isFinishing()) return;
+        activity.showLoadIndicator(true);
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        _context.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
-        _size = Math.min(height,width)-40;
+        _size = Math.max(Math.min(height,width)-40, 500);
     }
 
     @Override
@@ -38,7 +41,9 @@ public class GenerateQrAsync extends AsyncTask<String, Void, Bitmap> {
 
     @Override
     protected void onPostExecute(Bitmap result) {
-        _context.showLoadIndicator(false);
-        _context.setQrBitmap(result);
+        QrDisplayActivity activity = _context.get();
+        if(null==activity || activity.isFinishing()) return;
+        activity.showLoadIndicator(false);
+        activity.setQrBitmap(result);
     }
 }

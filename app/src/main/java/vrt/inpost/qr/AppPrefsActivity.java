@@ -1,9 +1,12 @@
 package vrt.inpost.qr;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.view.Menu;
@@ -12,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,9 +25,9 @@ public class AppPrefsActivity extends AppCompatActivity {
     private SharedPreferences.Editor _prefEditor;
     final private HashMap<String,View> _prefViews= new HashMap<>();
 
-    final LinearLayout.LayoutParams _innerLayoutParams= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
-    final ViewGroup.LayoutParams _viewLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+    private final ViewGroup.LayoutParams _viewLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
 
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +40,6 @@ public class AppPrefsActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
     }
@@ -61,13 +62,13 @@ public class AppPrefsActivity extends AppCompatActivity {
     }
 
     private void UpdatePrefs() {
-        if(null==_prefViews || _prefViews.isEmpty()) return;
+        if(_prefViews.isEmpty()) return;
         for(Map.Entry<String, ?> entry : _prefViews.entrySet()) {
             String key = entry.getKey();
             EditText value = (EditText)entry.getValue();
             if(null==key || null==value) continue;
             String strValue = value.getText().toString();
-            if(null==strValue || strValue.length()==0) _prefEditor.remove(key);
+            if(strValue.length()==0) _prefEditor.remove(key);
             else _prefEditor.putString(key,strValue);
         }
     }
@@ -84,33 +85,32 @@ public class AppPrefsActivity extends AppCompatActivity {
         for(Map.Entry<String, ?> entry : prefs.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue().toString();
-            LinearLayout innerContainer = CreateInnerLayout(ctx);
-            innerContainer.addView(CreateLabel(ctx,key));
-            EditText editText = CreateField(ctx,value, key);
+
+            TextInputLayout innerContainer = CreateInnerLayout();
+            EditText editText = CreateField(ctx,value,key);
             innerContainer.addView(editText);
+
             _prefViews.put(key,editText);
             container.addView(innerContainer);
         }
     }
 
-    private LinearLayout CreateInnerLayout(Context ctx) {
-        LinearLayout innerContainer = new LinearLayout(ctx);
-        innerContainer.setOrientation(LinearLayout.VERTICAL);
-        innerContainer.setLayoutParams(_innerLayoutParams);
-        return innerContainer;
-    }
-
-    private TextView CreateLabel(Context ctx, String labelValue) {
-        if(null==ctx || null==labelValue) return null;
-        TextView label = new TextView(ctx);
-        label.setText(labelValue);
-        label.setLayoutParams(_viewLayoutParams);
-        return label;
+    private TextInputLayout CreateInnerLayout() {
+        TextInputLayout txtLayout = new TextInputLayout(this);
+        TextInputLayout.LayoutParams txtPar = new TextInputLayout.LayoutParams(TextInputLayout.LayoutParams.MATCH_PARENT,TextInputLayout.LayoutParams.WRAP_CONTENT);
+        txtLayout.setLayoutParams(txtPar);
+        return txtLayout;
     }
 
     private EditText CreateField(Context ctx, String fieldValue, String tag) {
         EditText editText = new EditText(ctx);
+        return SetFieldContext(editText,fieldValue,tag);
+    }
+
+    private EditText SetFieldContext(@NonNull EditText editText, String fieldValue, String tag) {
+
         editText.setTag(tag);
+        editText.setHint(tag);
         editText.setText(fieldValue);
         editText.setLayoutParams(_viewLayoutParams);
         if(tag.startsWith("SIM")) {

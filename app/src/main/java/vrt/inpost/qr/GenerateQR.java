@@ -11,9 +11,9 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class GenerateQR {
+class GenerateQR {
 
-    public static Bitmap generate(String mContent, int size) {
+    static Bitmap generate(String mContent, int size) {
         try {
             Map<EncodeHintType, Object> hints =  new EnumMap<>(EncodeHintType.class);
             hints.put(EncodeHintType.MARGIN, 1);

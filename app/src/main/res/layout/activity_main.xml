@@ -8,10 +8,11 @@
 
     <!--Divider code in ListView-->
     <ListView
-        android:id="@+id/smsListiew"
+        android:id="@+id/smsListView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
+        android:focusable="true"
         android:divider="#020"
         android:dividerHeight="2dp"
         android:listSelector="#fe0"

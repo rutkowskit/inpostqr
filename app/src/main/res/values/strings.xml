@@ -14,6 +14,7 @@
     <string name="okLabel">OK</string>
     <string name="qrCodeLabel">Kod QR</string>
     <string name="appTitle">Generator Kodów QR Inpost</string>
+    <string name="appLabel">Inpost QR</string>
     <string name="action_refresh">Odśwież</string>
     <string name="action_close">Zamknij</string>
     <string name="msgRefreshed">Odświeżono</string>
@@ -25,4 +26,10 @@
     <string name="msgPhoneNumberTooShort">Zbyt krótki numer telefonu</string>
     <string name="msgReceptionCodeTooShort">Kod odbioru zbyt krótki</string>
     <string name="msgAccessDeniedSmsRead">Brak uprawnień do czytania SMS</string>
+    <string name="prefSMS">SMS</string>
+    <string name="formatEnterPhoneForSimInSlot">Wpisz nr telefonu dla sim w slocie %d</string>
+    <string name="formatSimKey">SIM_%d_%s</string>
+    <string name="labelEnterPhoneNumber">Wpisz numer telefonu :</string>
+    <string name="labelEnterReceptionCode">Wpisz kod odbioru:</string>
+    <string name="labelPreferences">Ustawienia</string>
 </resources>
