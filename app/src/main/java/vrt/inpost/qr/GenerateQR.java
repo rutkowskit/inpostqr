@@ -13,10 +13,11 @@ import java.util.Map;
 
 class GenerateQR {
 
+    @SuppressWarnings("SameParameterValue")
     static Bitmap generate(String mContent, int size) {
         try {
             Map<EncodeHintType, Object> hints =  new EnumMap<>(EncodeHintType.class);
-            hints.put(EncodeHintType.MARGIN, 1);
+            hints.put(EncodeHintType.MARGIN, 2);
             hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
 
             BitMatrix bitMatrix = new QRCodeWriter().encode(mContent, BarcodeFormat.QR_CODE, size, size, hints);

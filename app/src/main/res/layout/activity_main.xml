@@ -6,17 +6,21 @@
     android:layout_height="match_parent"
     tools:context="vrt.inpost.qr.MainActivity">
 
-    <!--Divider code in ListView-->
-    <ListView
-        android:id="@+id/smsListView"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:divider="#020"
-        android:dividerHeight="2dp"
-        android:listSelector="#fe0"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        /> <!--list selector in green color-->
-
+    <android.support.v4.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ListView
+            android:id="@+id/smsListView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:divider="#020"
+            android:dividerHeight="2dp"
+            android:listSelector="#fe0"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            />
+    </android.support.v4.widget.SwipeRefreshLayout>
 </android.support.design.widget.CoordinatorLayout>

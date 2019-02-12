@@ -2,18 +2,10 @@
     <string name="app_name">Inpost QR Generator</string>
     <string name="action_settings">Ustawienia</string>
 
-    <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
-
-    <!-- Example settings for Data & Sync -->
-
-    <!-- Example settings for Notifications -->
 
     <string name="cancelLabel">Anuluj</string>
     <string name="okLabel">OK</string>
     <string name="qrCodeLabel">Kod QR</string>
-    <string name="appTitle">Generator Kodów QR Inpost</string>
     <string name="appLabel">Inpost QR</string>
     <string name="action_refresh">Odśwież</string>
     <string name="action_close">Zamknij</string>
@@ -32,4 +24,9 @@
     <string name="labelEnterPhoneNumber">Wpisz numer telefonu :</string>
     <string name="labelEnterReceptionCode">Wpisz kod odbioru:</string>
     <string name="labelPreferences">Ustawienia</string>
+    <string name="prefMaxDays">MAX_DAYS</string>
+    <string name="prefMainName">PrefMain</string>
+    <string name="labelMaxDays">Liczba dni wstecz</string>
+
+
 </resources>

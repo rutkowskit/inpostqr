@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.view.Menu;
@@ -15,27 +14,51 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class AppPrefsActivity extends AppCompatActivity {
+public class AppPrefsActivity extends SwipeDismissBaseActivity {
 
+    private SharedPreferences _prefMain;
     private SharedPreferences _pref;
-    private SharedPreferences.Editor _prefEditor;
-    final private HashMap<String,View> _prefViews= new HashMap<>();
+    final private int _minDays=5;
 
+    final private HashMap<String,View> _prefViews= new HashMap<>();
+    private LinearLayout _prefContainer;
     private final ViewGroup.LayoutParams _viewLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+    private SeekBar _maxDaysValueField;
 
     @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_prefs);
-
+        _prefContainer =  findViewById(R.id.prefContainer);
         _pref = getApplicationContext().getSharedPreferences(getString(R.string.prefName), 0); // 0 - for private mode
-        _prefEditor = _pref.edit();
+        _prefMain = getApplicationContext().getSharedPreferences(getString(R.string.prefMainName), 0); // 0 - for private mode
+        _maxDaysValueField = findViewById(R.id.maxDaysField);
+        registerMaxDaysCallbacks();
         createOptions();
+    }
+
+    private void registerMaxDaysCallbacks() {
+        final TextView seekValue = findViewById(R.id.maxDaysNumeric);
+
+        _maxDaysValueField.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progress = (progress/_minDays)*_minDays ;
+                seekValue.setText(String.valueOf(progress+_minDays));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
     @Override
@@ -50,7 +73,7 @@ public class AppPrefsActivity extends AppCompatActivity {
 
         if (id == R.id.action_save) {
             UpdatePrefs();
-            if(_prefEditor.commit()) {
+            if(UpdatePrefs()) {
                 Notify.Info(this, getString(R.string.msgSaved));
                 createOptions();
             }
@@ -61,23 +84,48 @@ public class AppPrefsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void UpdatePrefs() {
-        if(_prefViews.isEmpty()) return;
+    private boolean UpdatePrefs() {
+        if(_prefViews.isEmpty()) return false;
+
+        //aktualizacja ustawien głównych
+        SharedPreferences.Editor prefMainEditor = _prefMain.edit();
+        int progress = _maxDaysValueField.getProgress();
+        progress = (progress/_minDays)*_minDays ;
+        prefMainEditor.putInt(getString(R.string.prefMaxDays),progress+_minDays);
+        prefMainEditor.apply();
+
+        SharedPreferences.Editor prefEditor = _pref.edit();
+        //aktualizacja numerów telefonów dla sim-ow
         for(Map.Entry<String, ?> entry : _prefViews.entrySet()) {
             String key = entry.getKey();
             EditText value = (EditText)entry.getValue();
             if(null==key || null==value) continue;
             String strValue = value.getText().toString();
-            if(strValue.length()==0) _prefEditor.remove(key);
-            else _prefEditor.putString(key,strValue);
+            if(strValue.length()==0) prefEditor.remove(key);
+            else prefEditor.putString(key,strValue);
         }
+        return prefEditor.commit();
     }
 
     private void createOptions() {
+        _prefContainer.removeAllViews();
+        createMainOptions();
+        createPhonesOptions();
+    }
+
+    private void createMainOptions() {
+        String maxDaysKey = getString(R.string.prefMaxDays);
+        if(!_prefMain.contains(maxDaysKey)) {
+            _prefMain.edit().putInt(maxDaysKey,10).apply();
+        }
+        int maxDaysValue = _prefMain.getInt(maxDaysKey,10);
+        _maxDaysValueField.setProgress(maxDaysValue-_minDays);
+    }
+
+    private void createPhonesOptions() {
         Map<String,?> prefs =  _pref.getAll();
         _prefViews.clear();
-        LinearLayout container =  findViewById(R.id.prefContainer);// new LinearLayout(this);
-        container.removeAllViews();
+
         if(null==prefs || prefs.isEmpty()) return;
 
         Context ctx = getBaseContext();
@@ -91,7 +139,7 @@ public class AppPrefsActivity extends AppCompatActivity {
             innerContainer.addView(editText);
 
             _prefViews.put(key,editText);
-            container.addView(innerContainer);
+            _prefContainer.addView(innerContainer);
         }
     }
 

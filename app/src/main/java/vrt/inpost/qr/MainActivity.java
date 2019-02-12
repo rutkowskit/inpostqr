@@ -2,6 +2,7 @@ package vrt.inpost.qr;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -33,31 +35,60 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_SMS=6789;
-    private SharedPreferences _pref;
-    private int _maxDaysBeforeNow;
+    private SharedPreferences _prefPhones;
+    private SharedPreferences _prefMain;
     private final Activity _context = this;
     private final Locale _locale= new Locale("POLISH","PL","pl");
+    private SwipeRefreshLayout _swipe;
 
     private ViewGroup _rootView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        _pref = getApplicationContext().getSharedPreferences(getString(R.string.prefName), 0); // 0 - for private mode
-        _maxDaysBeforeNow= _pref.getInt("MAX_DAYS", 10);
+
+        final Context appCtx = getApplicationContext();
+        _prefPhones = appCtx.getSharedPreferences(getString(R.string.prefName), 0); // 0 - for private mode
+        _prefMain = appCtx.getSharedPreferences(getString(R.string.prefMainName),0);
+
         _rootView = findViewById(android.R.id.content);
+        _swipe = findViewById(R.id.swipeRefresh);
+        //setTitle(R.string.appLabel);
+        registerSwipeRefresh();
+        loadSmsList();
+    }
 
-        setTitle(R.string.appTitle);
-
+    private void loadSmsList() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_SMS},
-                        MY_PERMISSIONS_REQUEST_READ_SMS);
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_SMS},
+                    MY_PERMISSIONS_REQUEST_READ_SMS);
+        } else {
+            onRefreshSmsList(false);
         }
-        else {
-            updateListView(SmsUtils.getSmsList(_context,false,_maxDaysBeforeNow));
+    }
+
+    private void registerSwipeRefresh() {
+        if (null != _swipe) {
+            _swipe.setOnRefreshListener(
+                    new SwipeRefreshLayout.OnRefreshListener() {
+                        @Override
+                        public void onRefresh() {
+                            onRefreshSmsList(true);
+                        }
+                    }
+            );
         }
+    }
+
+    private void onRefreshSmsList(boolean forceRefresh) {
+        int maxDays = _prefMain.getInt(getString(R.string.prefMaxDays), 10);
+        updateListView(SmsUtils.getSmsList(_context, forceRefresh, maxDays));
+        if(null!=_swipe)
+            _swipe.setRefreshing(false);
+        if(forceRefresh)
+            Notify.Info(this, getString(R.string.msgRefreshed));
     }
 
     @Override
@@ -71,8 +102,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            updateListView(SmsUtils.getSmsList(_context,true,_maxDaysBeforeNow));
-            Notify.Info(this, getString(R.string.msgRefreshed));
+            onRefreshSmsList(true);
             return true;
         }
         if (id == R.id.action_closeApp) {
@@ -99,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             case MY_PERMISSIONS_REQUEST_READ_SMS: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    updateListView(SmsUtils.getSmsList(_context,false,_maxDaysBeforeNow));
+                    onRefreshSmsList(false);
                 } else {
                     Notify.Error(this,getString(R.string.msgAccessDeniedSmsRead));
                 }
@@ -181,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
     private List<String> getPhoneNumberFromPrefs() {
 
         List<String> result=new ArrayList<>();
-        for(Map.Entry<String, ?> entry : _pref.getAll().entrySet()) {
+        for(Map.Entry<String, ?> entry : _prefPhones.getAll().entrySet()) {
             String key = entry.getKey();
             if(!key.startsWith("SIM")) continue;
             result.add(entry.getValue().toString());
@@ -196,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
         final String key = String.format(_locale, getString(R.string.formatSimKey),sms.SimSlot+1, sms.SimImsi);
 
-        String result = _pref.getString(key, null);
+        String result = _prefPhones.getString(key, null);
         if(null!=result) return result;
 
         LayoutInflater li = LayoutInflater.from(_context);
@@ -217,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
                     Notify.Error(_context, getString(R.string.msgPhoneNumberTooShort));
                     return false;
                 }
-                SharedPreferences.Editor editor = _pref.edit();
+                SharedPreferences.Editor editor = _prefPhones.edit();
                 editor.putString(key,phone );
                 editor.apply();
                 showQrCode(phone,sms.ReceptionCode);

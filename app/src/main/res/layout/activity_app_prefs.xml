@@ -1,15 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="vrt.inpost.qr.AppPrefsActivity">
 
+    <TextView
+        android:id="@+id/maxDaysLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="27dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/labelMaxDays"
+        app:layout_constraintEnd_toStartOf="@+id/maxDaysField"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/labelMaxDays" />
+
+    <SeekBar
+        android:id="@+id/maxDaysField"
+        android:layout_width="0dp"
+        android:layout_height="26dp"
+        android:layout_marginTop="8dp"
+        android:max="95"
+        app:layout_constraintEnd_toStartOf="@+id/maxDaysNumeric"
+        app:layout_constraintHorizontal_bias="0.93"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toEndOf="@+id/maxDaysLabel"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
     <LinearLayout
         android:id="@+id/prefContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/maxDaysField"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/maxDaysNumeric"
+        android:layout_width="wrap_content"
+        android:layout_height="27dp"
+        android:layout_marginTop="8dp"
+        android:minWidth="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/maxDaysField"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
 </android.support.constraint.ConstraintLayout>
