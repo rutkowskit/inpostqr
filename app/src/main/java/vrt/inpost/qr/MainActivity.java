@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +36,11 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_SMS=6789;
+    private static  final String[] REQUIRED_PERMISSIONS = new String[] {
+            //Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_SMS,
+    };
+
     private SharedPreferences _prefPhones;
     private SharedPreferences _prefMain;
     private final Activity _context = this;
@@ -59,14 +65,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadSmsList() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_SMS},
-                    MY_PERMISSIONS_REQUEST_READ_SMS);
-        } else {
+        if(hasRequiredPermissions()) {
             onRefreshSmsList(false);
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS , MY_PERMISSIONS_REQUEST_READ_SMS);
         }
+    }
+
+    private boolean hasRequiredPermissions() {
+        for (String permission: REQUIRED_PERMISSIONS){
+            if(!hasPermission(permission)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean hasPermission(String permission) {
+        return ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED;
     }
 
     private void registerSwipeRefresh() {
@@ -123,16 +139,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
+                                           @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_READ_SMS: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onRefreshSmsList(false);
-                } else {
-                    Notify.Error(this,getString(R.string.msgAccessDeniedSmsRead));
-                }
+        if (requestCode == MY_PERMISSIONS_REQUEST_READ_SMS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onRefreshSmsList(false);
+            } else {
+                Notify.Error(this, getString(R.string.msgAccessDeniedSmsRead));
             }
         }
     }
@@ -221,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private String getPhoneNumber(final SmsData sms) {
-
         if(null==sms) return null;
 
         final String key = String.format(_locale, getString(R.string.formatSimKey),sms.SimSlot+1, sms.SimImsi);

@@ -11,6 +11,7 @@ class SmsDataResolver {
     final private int _senderIdx;
     final private int _dateSentIdx ;
     final private int _simSlotIdx;
+    final private int _simId;
     final private int _simImsiIdx;
     final private int _subjectIdx;
     final private int _bodyIdx;
@@ -22,11 +23,12 @@ class SmsDataResolver {
         _senderIdx = cursor.getColumnIndex("address");
         _dateSentIdx = cursor.getColumnIndex("date_sent");
         _simSlotIdx = cursor.getColumnIndex("sim_slot");
+        _simId = cursor.getColumnIndex("sim_id");
         _simImsiIdx = cursor.getColumnIndex("sim_imsi");
         _subjectIdx = cursor.getColumnIndex("subject");
         _bodyIdx = cursor.getColumnIndex("body");
         _cursor = cursor;
-        _hasNext= _cursor.moveToFirst();
+        _hasNext = _cursor.moveToFirst();
     }
 
     SmsData getNext() {
@@ -37,10 +39,14 @@ class SmsDataResolver {
         result.Body = _cursor.getString(_bodyIdx);
         result.Sender = _cursor.getString(_senderIdx);
         result.DateSent = millisToDate(_cursor.getLong(_dateSentIdx));
-        result.SimSlot = _cursor.getInt(_simSlotIdx);
-        result.SimImsi = _cursor.getString(_simImsiIdx);
+        if(_simSlotIdx>=0)
+        {
+            result.SimSlot = _cursor.getInt(_simSlotIdx);
+        } else if (_simId >= 0) {
+            result.SimSlot = _cursor.getInt(_simId);
+        }
+        result.SimImsi = _simImsiIdx >= 0 ? _cursor.getString(_simImsiIdx) : "";
         result.ReceptionCode = InpostHelper.getReceptionCode(result);
-
         _hasNext=_cursor.moveToNext();
         return result;
     }
