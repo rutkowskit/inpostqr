@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 
 class InpostHelper {
 
-    private static final Pattern sPattern
-            = Pattern.compile(".*?Kod odbioru.*?(\\d{6}).*?",Pattern.CASE_INSENSITIVE);
+    private final static String regex = ".*?Kod\\s*odbioru.*?(\\d{6})\\b.*";
+    private static final Pattern sPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE |Pattern.MULTILINE |Pattern.DOTALL);
 
     static String getReceptionCode(SmsData sms)
     {
@@ -18,7 +18,7 @@ class InpostHelper {
     private static String getReceptionCode(String smsBody)
     {
         if(null==smsBody) return null;
-        Matcher m= sPattern.matcher(smsBody);
+        final Matcher m = sPattern.matcher(smsBody);
         if(m.matches()) {
             return  m.group(1);
         }
