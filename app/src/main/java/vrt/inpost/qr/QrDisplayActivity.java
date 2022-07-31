@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -21,8 +22,22 @@ public class QrDisplayActivity extends SwipeDismissBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qr_display);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setWindowFullBrightness();
         _imageView = findViewById(R.id.imageView);
         startQrGenerator();
+    }
+
+    private void setWindowFullBrightness()
+    {
+        try {
+            Window window = getWindow();
+            WindowManager.LayoutParams layout = window.getAttributes();
+            layout.screenBrightness = 1f;
+            window.setAttributes(layout);
+        }
+        catch(Exception ex) {
+            //do nothing with the exception
+        }
     }
 
     private void startQrGenerator() {
@@ -32,12 +47,7 @@ public class QrDisplayActivity extends SwipeDismissBaseActivity {
         {
             final String sms = intent.getStringExtra("SMS");
             if(null==sms) this.finish();
-            _imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Notify.Info(_context,sms, 5000);
-                }
-            });
+            _imageView.setOnClickListener(v -> Notify.Info(_context,sms, 5000));
             _loadProgress = findViewById(R.id.loading_spinner);
             new GenerateQrAsync(new WeakReference<>(this)).execute(sms);
 
