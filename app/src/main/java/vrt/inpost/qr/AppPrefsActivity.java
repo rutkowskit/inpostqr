@@ -3,8 +3,8 @@ package vrt.inpost.qr;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
+import androidx.annotation.NonNull;
+import com.google.android.material.textfield.TextInputLayout;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
@@ -62,7 +62,7 @@ public class AppPrefsActivity extends SwipeDismissBaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
     }

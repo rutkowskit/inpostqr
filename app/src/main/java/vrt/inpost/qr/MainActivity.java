@@ -8,13 +8,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -87,13 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void registerSwipeRefresh() {
         if (null != _swipe) {
-            _swipe.setOnRefreshListener(
-                    new SwipeRefreshLayout.OnRefreshListener() {
-                        @Override
-                        public void onRefresh() {
-                            onRefreshSmsList(true);
-                        }
-                    }
+            _swipe.setOnRefreshListener(() -> onRefreshSmsList(true)
             );
         }
     }
@@ -108,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
@@ -148,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 Notify.Error(this, getString(R.string.msgAccessDeniedSmsRead));
             }
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void updateListView(List<SmsData> data) {
@@ -156,14 +151,10 @@ public class MainActivity extends AppCompatActivity {
         final SmsListAdapter adapter = new SmsListAdapter(this,data);
         listview.setAdapter(adapter);
 
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, final View view,
-                                    int position, long id) {
-                SmsData item = (SmsData) parent.getItemAtPosition(position);
-                String phoneNumber = getPhoneNumber(item);
-                showQrCode(phoneNumber, item.ReceptionCode);
-            }
+        listview.setOnItemClickListener((parent, view, position, id) -> {
+            SmsData item = (SmsData) parent.getItemAtPosition(position);
+            String phoneNumber = getPhoneNumber(item);
+            showQrCode(phoneNumber, item.ReceptionCode);
         });
     }
 
@@ -202,22 +193,19 @@ public class MainActivity extends AppCompatActivity {
         phoneField.setAdapter(adapter);
         phoneField.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
-        createAlertDialog(promptsView, new OnAlertDialogClickListener() {
-            @Override
-            public boolean onOK(DialogInterface dialog) {
-                String phone = phoneField.getText().toString();
-                String code = codeField.getText().toString();
-                if(phone.length()!=9) {
-                    Notify.Error(_context, getString(R.string.msgPhoneNumberTooShort));
-                    return false;
-                }
-                if(code.length()!=6) {
-                    Notify.Error(_context, getString(R.string.msgReceptionCodeTooShort));
-                    return false;
-                }
-                showQrCode(phone, code);
-                return true;
+        createAlertDialog(promptsView, dialog -> {
+            String phone = phoneField.getText().toString();
+            String code = codeField.getText().toString();
+            if(phone.length()!=9) {
+                Notify.Error(_context, getString(R.string.msgPhoneNumberTooShort));
+                return false;
             }
+            if(code.length()!=6) {
+                Notify.Error(_context, getString(R.string.msgReceptionCodeTooShort));
+                return false;
+            }
+            showQrCode(phone, code);
+            return true;
         }).show();
     }
 
@@ -251,20 +239,17 @@ public class MainActivity extends AppCompatActivity {
         phoneField.setHint(String.format(_locale,
                 getString(R.string.formatEnterPhoneForSimInSlot), sms.SimSlot+1));
 
-        createAlertDialog(promptsView, new OnAlertDialogClickListener() {
-            @Override
-            public boolean onOK(DialogInterface dialog) {
-                String phone = phoneField.getText().toString();
-                if(phone.length()!=9) {
-                    Notify.Error(_context, getString(R.string.msgPhoneNumberTooShort));
-                    return false;
-                }
-                SharedPreferences.Editor editor = _prefPhones.edit();
-                editor.putString(key,phone );
-                editor.apply();
-                showQrCode(phone,sms.ReceptionCode);
-                return true;
+        createAlertDialog(promptsView, dialog -> {
+            String phone = phoneField.getText().toString();
+            if(phone.length()!=9) {
+                Notify.Error(_context, getString(R.string.msgPhoneNumberTooShort));
+                return false;
             }
+            SharedPreferences.Editor editor = _prefPhones.edit();
+            editor.putString(key,phone );
+            editor.apply();
+            showQrCode(phone,sms.ReceptionCode);
+            return true;
         }).show();
 
         return null;
@@ -277,19 +262,13 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.cancelLabel, null)
                 .create();
 
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(final DialogInterface dialog) {
+        alertDialog.setOnShowListener(dialog -> {
 
-                Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if(okListener.onOK(dialog))
-                            dialog.dismiss();
-                    }
-                });
-            }
+            Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view -> {
+                if(okListener.onOK(dialog))
+                    dialog.dismiss();
+            });
         });
         return alertDialog;
     }

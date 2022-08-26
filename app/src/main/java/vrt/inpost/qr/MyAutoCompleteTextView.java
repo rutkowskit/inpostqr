@@ -5,7 +5,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
-public class MyAutoCompleteTextView extends android.support.v7.widget.AppCompatAutoCompleteTextView {
+public class MyAutoCompleteTextView extends androidx.appcompat.widget.AppCompatAutoCompleteTextView {
 
     public MyAutoCompleteTextView(Context context) {
         super(context);

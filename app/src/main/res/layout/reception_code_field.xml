@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.design.widget.TextInputLayout
+<com.google.android.material.textfield.TextInputLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:counterEnabled="true"
     app:counterMaxLength="6"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <android.support.design.widget.TextInputEditText
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/uxReceptionCodeField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,5 +15,5 @@
         android:inputType="number"
         android:digits="0123456789"
         />
-</android.support.design.widget.TextInputLayout>
+</com.google.android.material.textfield.TextInputLayout>
 
