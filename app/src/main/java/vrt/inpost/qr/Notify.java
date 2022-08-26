@@ -13,8 +13,11 @@ class Notify {
     static void Info(Activity activity, String msg) {
         Info(activity,msg,3000);
     }
-
     static void Info(Activity activity, String msg, int duration) {
+        ShowNotifiation(activity,msg,duration, Color.parseColor("#00FF00"));
+    }
+
+    static void ShowNotifiation(Activity activity, String msg, int duration, int color) {
         if(null==msg || msg.length()==0) return;
 
         //Context context = activity.getApplicationContext();
@@ -22,23 +25,12 @@ class Notify {
 
         Snackbar.make(rootView, msg, Snackbar.LENGTH_LONG)
                 .setDuration(duration)
+                .setTextColor(color)
+                .setText(msg)
                 .show();
-
-        /*
-        Toast toast = Toast.makeText(context, msg,Toast.LENGTH_LONG);
-        toast.setDuration(duration);
-        toast.show();
-        */
     }
 
     static void Error(Activity activity, String msg) {
-        if(null==msg || msg.length()==0) return;
-        Context context = activity.getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, msg, duration);
-        TextView v = toast.getView().findViewById(android.R.id.message);
-        v.setTextColor(Color.RED);
-
-        toast.show();
+        ShowNotifiation(activity,msg,3000, Color.parseColor("#FF0000"));
     }
 }

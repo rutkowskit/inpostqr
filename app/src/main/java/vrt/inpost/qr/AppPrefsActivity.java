@@ -72,39 +72,42 @@ public class AppPrefsActivity extends SwipeDismissBaseActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_save) {
-            UpdatePrefs();
+            // UpdatePrefs();
             if(UpdatePrefs()) {
                 Notify.Info(this, getString(R.string.msgSaved));
                 createOptions();
             }
-            else
+            else {
                 Notify.Error(this, getString(R.string.msgSaveError));
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     private boolean UpdatePrefs() {
-        if(_prefViews.isEmpty()) return false;
 
-        //aktualizacja ustawien głównych
+        // aktualizacja ustawien głównych
         SharedPreferences.Editor prefMainEditor = _prefMain.edit();
         int progress = _maxDaysValueField.getProgress();
         progress = (progress/_minDays)*_minDays ;
         prefMainEditor.putInt(getString(R.string.prefMaxDays),progress+_minDays);
         prefMainEditor.apply();
 
-        SharedPreferences.Editor prefEditor = _pref.edit();
-        //aktualizacja numerów telefonów dla sim-ow
-        for(Map.Entry<String, ?> entry : _prefViews.entrySet()) {
-            String key = entry.getKey();
-            EditText value = (EditText)entry.getValue();
-            if(null==key || null==value) continue;
-            String strValue = value.getText().toString();
-            if(strValue.length()==0) prefEditor.remove(key);
-            else prefEditor.putString(key,strValue);
+        if(!_prefViews.isEmpty()) {
+            SharedPreferences.Editor prefEditor = _pref.edit();
+            // aktualizacja numerów telefonów dla sim-ow
+            for(Map.Entry<String, ?> entry : _prefViews.entrySet()) {
+                String key = entry.getKey();
+                EditText value = (EditText)entry.getValue();
+                if(null==key || null==value) continue;
+                String strValue = value.getText().toString();
+                if(strValue.length()==0) prefEditor.remove(key);
+                else prefEditor.putString(key,strValue);
+            }
+            return prefEditor.commit();
         }
-        return prefEditor.commit();
+        return prefMainEditor.commit();
     }
 
     private void createOptions() {

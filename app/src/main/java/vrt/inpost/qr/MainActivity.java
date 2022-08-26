@@ -3,7 +3,6 @@ package vrt.inpost.qr;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -21,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -37,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_SMS=6789;
     private static  final String[] REQUIRED_PERMISSIONS = new String[] {
-            //Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.READ_SMS,
     };
 
@@ -82,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean hasPermission(String permission) {
-        return ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void registerSwipeRefresh() {

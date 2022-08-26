@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('E:\\Projects\\Android\\keystore')
+            storePassword 'iwxp2wRtIUmJsViKOFzv'
+            keyAlias 'inpostqr'
+            keyPassword 'iwxp2wRtIUmJsViKOFzv'
+        }
+    }
     compileSdkVersion 32
     defaultConfig {
         applicationId "vrt.inpost.qr"
@@ -15,6 +23,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
