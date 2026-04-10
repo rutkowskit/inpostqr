@@ -56,10 +56,13 @@ jobs:
           app/build/outputs/apk/release/app-release-unsigned.apk
           rm keystore.jks
 
+      - name: Check signed APK
+        run: ls -la app-release-signed.apk
+
       - name: Create GitHub Release
         run: |
           gh release create ${{ github.ref_name }} \
-            ${{ steps.sign_apk.outputs.signedReleaseFile }} \
+            app-release-signed.apk \
             --title "Release ${{ github.ref_name }}" \
             --generate-notes
         env:
