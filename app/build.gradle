@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-            storeFile file('E:\\Projects\\Android\\keystore')
+            System.getenv("CI") ? null : file("E:\\Projects\\Android\\keystore")
             storePassword 'iwxp2wRtIUmJsViKOFzv'
             keyAlias 'inpostqr'
             keyPassword 'iwxp2wRtIUmJsViKOFzv'
@@ -22,7 +22,11 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if (System.getenv("CI")) {
+                signingConfig null   // <-- na CI nie podpisuj przez Gradle
+            } else {
+                signingConfig signingConfigs.release  // <-- lokalnie podpisuj normalnie
+            }
         }
     }
     namespace 'vrt.inpost.qr'
