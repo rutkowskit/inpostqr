@@ -43,15 +43,17 @@ jobs:
 
       - name: Sign APK
         run: |
-          BUILD_TOOLS=$ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools/ | sort -V | tail -1)
-          echo "${{ secrets.SIGNING_KEY_BASE64 }}" | base64 --decode > keystore.jks
+          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools/ | sort -V | tail -1)
+          BUILD_TOOLS=$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION
+          echo "Using build-tools: $BUILD_TOOLS_VERSION"
+          echo "${{ secrets.SIGNING_KEY_BASE64 }}" | base64 --decode > keystore.jks                    
           $BUILD_TOOLS/apksigner sign \
-            --ks keystore.jks \
-            --ks-alias ${{ secrets.SIGNING_KEY_ALIAS }} \
-            --ks-pass pass:${{ secrets.SIGNING_STORE_PASSWORD }} \
-            --key-pass pass:${{ secrets.SIGNING_KEY_PASSWORD }} \
-            --out app-release-signed.apk \
-            app/build/outputs/apk/release/app-release-unsigned.apk
+          --ks keystore.jks \
+          --ks-key-alias ${{ secrets.SIGNING_KEY_ALIAS }} \
+          --ks-pass pass:${{ secrets.SIGNING_STORE_PASSWORD }} \
+          --key-pass pass:${{ secrets.SIGNING_KEY_PASSWORD }} \
+          --out app-release-signed.apk \
+          app/build/outputs/apk/release/app-release-unsigned.apk
           rm keystore.jks
 
       - name: Create GitHub Release
