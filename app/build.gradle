@@ -1,13 +1,24 @@
 apply plugin: 'com.android.application'
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
 android {
     compileSdk 34
-    signingConfigs {
-        release {
-            storeFile file("E:/Projects/Android/keystore")
-            storePassword 'iwxp2wRtIUmJsViKOFzv'
-            keyAlias 'inpostqr'
-            keyPassword 'iwxp2wRtIUmJsViKOFzv'
+    // podpisywanie tylko lokalnie
+    if (localProperties['signing.storePath']) {
+        signingConfigs {
+            release {
+                storeFile file(localProperties['signing.storePath'])
+                storePassword localProperties['signing.storePassword']
+                keyAlias localProperties['signing.keyAlias']
+                keyPassword localProperties['signing.keyPassword']
+            }
         }
     }
     defaultConfig {
@@ -24,10 +35,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            if (System.getenv("CI")) {
-                signingConfig null   // <-- na CI nie podpisuj przez Gradle
-            } else {
+            if (localProperties['signing.storePath']) {
                 signingConfig signingConfigs.release  // <-- lokalnie podpisuj normalnie
+            } else {
+                signingConfig null   // <-- na CI nie podpisuj przez Gradle
             }
         }
     }
