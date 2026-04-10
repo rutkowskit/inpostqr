@@ -1,12 +1,17 @@
 package vrt.inpost.qr;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class InpostHelper {
-
-    private final static String regex = ".*?(?:(?:(?:Kod|kodu)\s*odbioru.*?)|(?:podaj kod: ))(\d{6})\b.*";
-    private static final Pattern sPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE |Pattern.MULTILINE |Pattern.DOTALL);
+    private static final int patternFlags = Pattern.CASE_INSENSITIVE |Pattern.MULTILINE |Pattern.DOTALL;
+    private static final Map<String,Pattern> sPatterns = new HashMap<>();
+    static {
+        sPatterns.put("Paczkomat", Pattern.compile(".*?(?:Kod|kodu)\\s*odbioru.*?(\\d{6})\\b.*", patternFlags));
+        sPatterns.put("Appkomat", Pattern.compile(".*?InPost.*?kod:\\s*.*?(\\d{6})\\b.*", patternFlags));
+    };
 
     static String getReceptionCode(SmsData sms)
     {
@@ -18,9 +23,11 @@ class InpostHelper {
     private static String getReceptionCode(String smsBody)
     {
         if(null==smsBody) return null;
-        final Matcher m = sPattern.matcher(smsBody);
-        if(m.matches()) {
-            return  m.group(1);
+        for (Map.Entry<String, Pattern> entry : sPatterns.entrySet()) {
+            Matcher matcher = entry.getValue().matcher(smsBody);
+            if (matcher.matches()) {
+                return  matcher.group(1);
+            }
         }
         return  null;
     }
