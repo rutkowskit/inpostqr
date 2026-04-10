@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-            System.getenv("CI") ? null : file("E:\\Projects\\Android\\keystore")
+            System.getenv("CI") ? null : file("E:/Projects/Android/keystore")
             storePassword 'iwxp2wRtIUmJsViKOFzv'
             keyAlias 'inpostqr'
             keyPassword 'iwxp2wRtIUmJsViKOFzv'
